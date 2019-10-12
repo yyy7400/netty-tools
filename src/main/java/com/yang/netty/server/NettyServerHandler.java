@@ -22,6 +22,11 @@ import java.util.Arrays;
 @Slf4j
 public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
+    // 监听客户端不在线累计次数
+    private int lossConnectCount = 0;
+    // 监听客户端不在线累计最大次数，超过在关闭连接
+    private int lossConnectCountMax = 6;
+
     /**
      * 客户端连接触发
      *
@@ -31,10 +36,11 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-        InetSocketAddress inetSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        String ipPort = inetSocket.getAddress().getHostAddress() + ":" + inetSocket.getPort();
+        // 客户端上线，ip、port、channel
+        String ipPort = getIpPort(ctx);
         ChannelManager.getMap().put(ipPort, ctx.channel());
-        log.info("Channel active......");
+
+        log.info("{} 上线了", ipPort);
     }
 
     /**
@@ -46,11 +52,13 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-        InetSocketAddress inetSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        String ipPort = inetSocket.getAddress().getHostAddress() + ":" + inetSocket.getPort();
+        // 客户端下线、移除记录
+        String ipPort = getIpPort(ctx);
         ChannelManager.remove(ipPort);
 
         ctx.fireChannelInactive();
+
+        log.info("{} 下线了", ipPort);
     }
 
     /**
@@ -66,11 +74,15 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         if (!(msg instanceof ByteBuf)) {
             return;
         }
+        // 转换为协议消息结构
         SocketMessage socketMessage = new SocketMessageHandler().getSocketMessage((ByteBuf) msg);
         if (socketMessage == null) {
             return;
         }
-        log.info("body = {}, {}, {}", ChannelManager.size(), ctx.channel().id(), socketMessage.getBody());
+
+
+        String ipPort = getIpPort(ctx);
+        log.info("body = {}, {}, {}", ChannelManager.size(), ipPort, socketMessage.getBody());
     }
 
     /**
@@ -97,23 +109,33 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
-    private int loss_connect_time = 0;
+
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             if (event.state() == IdleState.READER_IDLE) {
-                loss_connect_time++;
-                System.out.println("60 秒没有接收到客户端的信息了" + ctx.channel().id());
-                if (loss_connect_time > 30) {
-                    System.out.println("关闭这个不活跃的channel");
-                    //ctx.channel().close();
+                String ipPort = getIpPort(ctx);
+                // 累计监听次数
+                lossConnectCount ++;
+                System.out.println("10 秒没有接收到客户端的信息了" + ipPort);
+                // 超过监听次数
+                if (lossConnectCount >= lossConnectCountMax) {
+                    System.out.println("关闭这个不活跃的channel" + ipPort);
+                    ctx.channel().close();
                 }
             }
         } else {
             super.userEventTriggered(ctx, evt);
         }
+    }
+
+    private String getIpPort(ChannelHandlerContext ctx) {
+        InetSocketAddress inetSocket = (InetSocketAddress) ctx.channel().remoteAddress();
+        String ipPort = inetSocket.getAddress().getHostAddress() + ":" + inetSocket.getPort();
+        return ipPort;
+
     }
 
 }

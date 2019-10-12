@@ -15,34 +15,34 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChannelManager {
 
-    private final static Map<String, Channel> channelCache = new ConcurrentHashMap<>();
+    private final static Map<String, Channel> channelMap = new ConcurrentHashMap<>();
 
     public void put(String key, Channel value) {
-        channelCache.put(key, value);
+        channelMap.put(key, value);
     }
 
     public static Map<String, Channel> getMap() {
-        return channelCache;
+        return channelMap;
     }
 
     public static List<Channel> get() {
 
         List<Channel> list = new ArrayList<>();
-        channelCache.forEach((k, v) -> {
+        channelMap.forEach((k, v) -> {
             list.add(v);
         });
         return list;
     }
 
     public static Channel get(String key) {
-        return channelCache.get(key);
+        return channelMap.get(key);
     }
 
     public static void remove(String key) {
-        channelCache.remove(key);
+        channelMap.remove(key);
     }
 
     public static int size() {
-        return channelCache.size();
+        return channelMap.size();
     }
 }

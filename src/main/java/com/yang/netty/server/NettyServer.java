@@ -1,5 +1,6 @@
 package com.yang.netty.server;
 
+import com.yang.netty.enums.PropertiesValue;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -7,7 +8,12 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.InetSocketAddress;
 
@@ -21,9 +27,6 @@ import java.net.InetSocketAddress;
 @Slf4j
 public class NettyServer {
 
-    private final static String IP = "192.168.129.42";
-    private final static int PORT = 8090;
-
     /**
      * 一个主线程
      */
@@ -34,7 +37,9 @@ public class NettyServer {
     EventLoopGroup workGroup = new NioEventLoopGroup();
 
     public void start() {
-        InetSocketAddress socketAddress = new InetSocketAddress(IP, PORT);
+
+        System.out.println(PropertiesValue.NETTY_SERVER_IP + ":" + PropertiesValue.NETTY_SERVER_PORT);
+        InetSocketAddress socketAddress = new InetSocketAddress(PropertiesValue.NETTY_SERVER_IP, PropertiesValue.NETTY_SERVER_PORT);
 
         ServerBootstrap bootstrap = new ServerBootstrap()
                 .group(bossGroup, workGroup)
