@@ -1,8 +1,11 @@
 package com.yang.netty.server;
 
+import com.alibaba.fastjson.JSON;
 import com.yang.netty.codec.SocketMessage;
 import com.yang.netty.codec.SocketMessageHandler;
 import com.yang.netty.enums.Constains;
+import com.yang.netty.enums.SocketMessageType;
+import com.yang.netty.model.Version;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -83,6 +86,13 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
         String ipPort = getIpPort(ctx);
         log.info("body = {}, {}, {}", ChannelManager.size(), ipPort, socketMessage.getBody());
+        if(socketMessage.getMainType() == SocketMessageType.CLIENT.getKey()
+            && socketMessage.getSubType() == SocketMessageType.CLIENT_GET_VERSION.getKey()){
+            Version obj = JSON.parseObject(socketMessage.getBody(), Version.class);
+            log.info("bodyJson = {}", obj.toString());
+        }
+
+
     }
 
     /**

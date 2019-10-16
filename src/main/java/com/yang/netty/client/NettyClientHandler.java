@@ -1,19 +1,18 @@
 package com.yang.netty.client;
 
+import com.alibaba.fastjson.JSON;
 import com.yang.netty.codec.SocketMessage;
 import com.yang.netty.codec.SocketMessageHandler;
+import com.yang.netty.enums.SocketMessageType;
+import com.yang.netty.model.Version;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.Timeout;
-import io.netty.util.Timer;
-import io.netty.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 客户端处理器
@@ -28,7 +27,8 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
 //        byte[] req = "test sample".getBytes();
-        String str = "端";
+        Version version = new Version("1", "第一版");
+        String str = JSON.toJSONString(version);
 //        ByteBuf message = null;
 //        for (int i = 100; i < 9000; i++) {
 //            message = Unpooled.buffer(req.length);
@@ -39,7 +39,7 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
 //        }
         // 恢复超时时间
 
-        SocketMessage socketMessage = new SocketMessage((short) 1, (short) 2, str);
+        SocketMessage socketMessage = new SocketMessage(SocketMessageType.CLIENT.getKey(), SocketMessageType.CLIENT_GET_VERSION.getKey(), str);
         ctx.writeAndFlush(socketMessage);
     }
 
@@ -74,7 +74,7 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             if (event.state() == IdleState.WRITER_IDLE) {
-                ctx.channel().writeAndFlush(new SocketMessage((short) 3, (short) 4, "ping"));
+                ctx.channel().writeAndFlush(new SocketMessage(SocketMessageType.HEARTBEAT.getKey(), SocketMessageType.HEARTBEAT_SEVER.getKey(), ""));
             }
         }
     }

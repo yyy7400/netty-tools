@@ -1,5 +1,6 @@
 package com.yang.netty.client;
 
+import com.yang.netty.enums.PropertiesValue;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -23,11 +24,9 @@ import java.util.concurrent.Future;
 @Slf4j
 public class NettyClient {
 
-    @Value("${netty.server.ip}")
-    public String IP;
+    public String IP = "192.168.129.42";
 
-    @Value("${netty.server.port}")
-    public int PORT;
+    public int PORT = 8090;
 
     // 重连时间
     private static int timeout = 0;
@@ -62,6 +61,7 @@ public class NettyClient {
     }
 
     private void reStart() {
+        //
         if (timeout <= 60) {
             timeout += 5;
         }

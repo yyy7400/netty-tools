@@ -84,5 +84,7 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.1.9.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-expression:5.1.9.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-all:4.1.41.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.60" level="project" />
+    <orderEntry type="library" name="Maven: Arquillian JUnit:Release" level="project" />
   </component>
 </module>
