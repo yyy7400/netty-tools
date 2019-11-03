@@ -1,18 +1,13 @@
 package com.yang.netty.client;
 
-import com.yang.netty.enums.PropertiesValue;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.Future;
 
 /**
  * 启动器
@@ -24,9 +19,9 @@ import java.util.concurrent.Future;
 @Slf4j
 public class NettyClient {
 
-    public String IP = "192.168.129.42";
+    public static final String IP = "192.168.129.42";
 
-    public int PORT = 8090;
+    public static final int PORT = 8090;
 
     // 重连时间
     private static int timeout = 0;
@@ -44,17 +39,15 @@ public class NettyClient {
         try {
             future = bootstrap.connect(IP, PORT).sync();
             timeout = 0;
-            System.out.println("连接成功");
+            log.info("连接成功");
             // 等待连接被关闭
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
         } finally {
-            //group.shutdownGracefully();
-            if (null != future) {
-                if (future.channel() != null && future.channel().isOpen()) {
-                    future.channel().close();
-                }
+            if (null != future && future.channel() != null && future.channel().isOpen()) {
+                future.channel().close();
             }
             reStart();
         }
@@ -65,12 +58,7 @@ public class NettyClient {
         if (timeout <= 60) {
             timeout += 5;
         }
-        try {
-            Thread.sleep(timeout * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("重连间隔：" + timeout);
+        log.info("重连间隔：{}", timeout);
         new NettyClient().start();
     }
 

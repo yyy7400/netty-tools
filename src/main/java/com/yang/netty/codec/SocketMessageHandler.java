@@ -1,9 +1,10 @@
 package com.yang.netty.codec;
 
-import com.yang.netty.enums.Constains;
+import com.yang.netty.enums.Constants;
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -13,42 +14,47 @@ import java.util.Arrays;
 public class SocketMessageHandler {
 
     /**
-     * byteBuf 转化为 SocketMessage 消息体
+     * (ByteBuf)msg 转化为 SocketMessage 消息体
      *
-     * @param byteBuf
+     * @param msg
      * @return SocketMessage
      */
-    public SocketMessage getSocketMessage(ByteBuf byteBuf) {
+    public SocketMessage getSocketMessage(Object msg) {
         try {
-            if (byteBuf.readableBytes() < Constains.SOCKET_MESSAGE_HEADER_SIZE) {
+            if (!(msg instanceof ByteBuf)) {
                 return null;
             }
 
-            SocketMessage msg = new SocketMessage();
+            ByteBuf byteBuf = (ByteBuf)msg;
+            if (byteBuf.readableBytes() < Constants.SOCKET_MESSAGE_HEADER_SIZE) {
+                return null;
+            }
+
+            SocketMessage socketMessage = new SocketMessage();
 
             byte[] start = new byte[4];
             byteBuf.readBytes(start, 0, 4);
-            if (!Arrays.equals(start, Constains.SOCKET_MESSAGE_HEADER_START)) {
+            if (!Arrays.equals(start, Constants.SOCKET_MESSAGE_HEADER_START)) {
                 log.info("header start 不一致：{}", new String(start));
                 return null;
             }
-            msg.setStart(start);
+            socketMessage.setStart(start);
 
-            msg.setId(byteBuf.readLong());
-            msg.setMainType(byteBuf.readShort());
-            msg.setSubType(byteBuf.readShort());
+            socketMessage.setId(byteBuf.readLong());
+            socketMessage.setMainType(byteBuf.readShort());
+            socketMessage.setSubType(byteBuf.readShort());
 
             int length = byteBuf.readInt();
             if (byteBuf.readableBytes() < length) {
                 return null;
             }
-            msg.setLength(length);
+            socketMessage.setLength(length);
 
             byte[] req = new byte[byteBuf.readableBytes()];
             byteBuf.readBytes(req);
-            msg.setBody(new String(req, "UTF-8"));
+            socketMessage.setBody(new String(req, StandardCharsets.UTF_8));
 
-            return msg;
+            return socketMessage;
 
         } catch (Exception ex) {
             log.info(ex.getMessage(), ex);

@@ -8,12 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.net.InetSocketAddress;
 
@@ -38,7 +33,7 @@ public class NettyServer {
 
     public void start() {
 
-        System.out.println(PropertiesValue.NETTY_SERVER_IP + ":" + PropertiesValue.NETTY_SERVER_PORT);
+        log.info("{}:{}", PropertiesValue.NETTY_SERVER_IP, PropertiesValue.NETTY_SERVER_PORT);
         InetSocketAddress socketAddress = new InetSocketAddress(PropertiesValue.NETTY_SERVER_IP, PropertiesValue.NETTY_SERVER_PORT);
 
         ServerBootstrap bootstrap = new ServerBootstrap()
@@ -59,7 +54,8 @@ public class NettyServer {
             future.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
         } finally {
             bossGroup.shutdownGracefully();
             workGroup.shutdownGracefully();

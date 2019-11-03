@@ -2,7 +2,7 @@ package com.yang.netty.server;
 
 import com.yang.netty.codec.SocketDecoder;
 import com.yang.netty.codec.SocketEncoder;
-import com.yang.netty.enums.Constains;
+import com.yang.netty.enums.Constants;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -20,7 +20,7 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
     protected void initChannel(SocketChannel socketChannel) throws Exception {
 
         // 读取客户端数据 60s 超时, 查看在线状态
-        socketChannel.pipeline().addLast("ping", new IdleStateHandler(Constains.SOCKET_IDLE_TIME * 2, 0, 0, TimeUnit.SECONDS));
+        socketChannel.pipeline().addLast("ping", new IdleStateHandler((long) Constants.SOCKET_IDLE_TIME * 2, 0, 0, TimeUnit.SECONDS));
 
         //添加自定义编码解码，解决粘包、拆包问题
         socketChannel.pipeline().addLast("decoder", new SocketDecoder());

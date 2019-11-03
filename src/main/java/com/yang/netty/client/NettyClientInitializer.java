@@ -2,7 +2,7 @@ package com.yang.netty.client;
 
 import com.yang.netty.codec.SocketDecoder;
 import com.yang.netty.codec.SocketEncoder;
-import com.yang.netty.enums.Constains;
+import com.yang.netty.enums.Constants;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -22,7 +22,7 @@ public class NettyClientInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel socketChannel) throws Exception {
 
         // 超时, 发送ping
-        socketChannel.pipeline().addLast("ping", new IdleStateHandler(Constains.SOCKET_IDLE_TIME, Constains.SOCKET_IDLE_TIME, 0, TimeUnit.SECONDS));
+        socketChannel.pipeline().addLast("ping", new IdleStateHandler(Constants.SOCKET_IDLE_TIME, Constants.SOCKET_IDLE_TIME, 0, TimeUnit.SECONDS));
 
         //添加自定义编码解码，解决粘包、拆包问题
         socketChannel.pipeline().addLast("decoder", new SocketDecoder());

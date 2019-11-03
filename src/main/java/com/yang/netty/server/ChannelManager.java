@@ -1,7 +1,6 @@
 package com.yang.netty.server;
 
 import io.netty.channel.Channel;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +14,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChannelManager {
 
-    private final static Map<String, Channel> channelMap = new ConcurrentHashMap<>();
+    private ChannelManager() {
+        throw new IllegalStateException(this.getClass().getName());
+    }
 
-    public void put(String key, Channel value) {
+    protected static Map<String, Channel> channelMap = new ConcurrentHashMap<>();
+
+    public static void put(String key, Channel value) {
         channelMap.put(key, value);
     }
 
@@ -28,9 +31,7 @@ public class ChannelManager {
     public static List<Channel> get() {
 
         List<Channel> list = new ArrayList<>();
-        channelMap.forEach((k, v) -> {
-            list.add(v);
-        });
+        channelMap.forEach((k, v) -> list.add(v));
         return list;
     }
 

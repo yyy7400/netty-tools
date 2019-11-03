@@ -8,10 +8,10 @@ import org.springframework.web.filter.CorsFilter;
 
 /**
  * Web Api 解决跨域请求
+ *
  * @author yangyuyang
  * @date 2019-10-11
  */
-
 
 
 @Configuration

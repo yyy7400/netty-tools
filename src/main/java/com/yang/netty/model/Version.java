@@ -8,7 +8,7 @@ package com.yang.netty.model;
  */
 public class Version {
     private String id;
-    private String Name;
+    private String name;
 
     public String getId() {
         return id;
@@ -19,23 +19,23 @@ public class Version {
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public Version(String id, String name) {
         this.id = id;
-        Name = name;
+        this.name = name;
     }
 
     @Override
     public String toString() {
         return "Version{" +
                 "id='" + id + '\'' +
-                ", Name='" + Name + '\'' +
+                ", name='" + name + '\'' +
                 '}';
     }
 }

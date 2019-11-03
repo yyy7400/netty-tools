@@ -1,12 +1,9 @@
 package com.yang.netty.server;
 
-import com.alibaba.fastjson.JSON;
 import com.yang.netty.codec.SocketMessage;
 import com.yang.netty.codec.SocketMessageHandler;
-import com.yang.netty.enums.Constains;
+import com.yang.netty.enums.Constants;
 import com.yang.netty.enums.SocketMessageType;
-import com.yang.netty.model.Version;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -14,7 +11,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 
 /**
  * netty服务端处理类
@@ -74,24 +70,30 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-        if (!(msg instanceof ByteBuf)) {
-            return;
-        }
         // 转换为协议消息结构
-        SocketMessage socketMessage = new SocketMessageHandler().getSocketMessage((ByteBuf) msg);
+        SocketMessage socketMessage = new SocketMessageHandler().getSocketMessage(msg);
         if (socketMessage == null) {
             return;
         }
 
-
+        // 管理客户端
         String ipPort = getIpPort(ctx);
-        log.info("body = {}, {}, {}", ChannelManager.size(), ipPort, socketMessage.getBody());
-        if(socketMessage.getMainType() == SocketMessageType.CLIENT.getKey()
-            && socketMessage.getSubType() == SocketMessageType.CLIENT_GET_VERSION.getKey()){
-            Version obj = JSON.parseObject(socketMessage.getBody(), Version.class);
-            log.info("bodyJson = {}", obj.toString());
-        }
+        ChannelManager.put(ipPort, ctx.channel());
 
+        MessageHandleFactory handle = null;
+        switch ((socketMessage.getMainType())) {
+            case SocketMessageType.HEARTBEAT:
+                handle = new HandleHeartbeat(ipPort, socketMessage);
+                break;
+            case SocketMessageType.CLIENT:
+                handle = new HandleClient(ipPort, socketMessage);
+                break;
+            default:
+                break;
+        }
+        if (handle != null) {
+            handle.recvHandle();
+        }
 
     }
 
@@ -115,10 +117,9 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        log.error(cause.getMessage(), cause);
         ctx.close();
     }
-
 
 
     @Override
@@ -128,11 +129,11 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             if (event.state() == IdleState.READER_IDLE) {
                 String ipPort = getIpPort(ctx);
                 // 累计监听次数
-                lossConnectCount ++;
-                System.out.println("10 秒没有接收到客户端的信息了" + ipPort);
+                lossConnectCount++;
+                log.info("{} 秒没有接收到客户端的信息了{}", Constants.SOCKET_IDLE_TIME, ipPort);
                 // 超过监听次数
                 if (lossConnectCount >= lossConnectCountMax) {
-                    System.out.println("关闭这个不活跃的channel" + ipPort);
+                    log.info("关闭这个不活跃的channel{}", ipPort);
                     ctx.channel().close();
                 }
             }
@@ -143,8 +144,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     private String getIpPort(ChannelHandlerContext ctx) {
         InetSocketAddress inetSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        String ipPort = inetSocket.getAddress().getHostAddress() + ":" + inetSocket.getPort();
-        return ipPort;
+        return inetSocket.getAddress().getHostAddress() + ":" + inetSocket.getPort();
 
     }
 

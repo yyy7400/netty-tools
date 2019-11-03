@@ -17,7 +17,7 @@ public class SocketEncoder extends MessageToByteEncoder<SocketMessage> {
     protected void encode(ChannelHandlerContext channelHandlerContext, SocketMessage socketMessage, ByteBuf byteBuf) throws Exception {
 
         if(null == socketMessage){
-            throw new Exception();
+            throw new NullPointerException();
         }
 
         String body = socketMessage.getBody();

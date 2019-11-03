@@ -1,6 +1,9 @@
 package com.yang.netty.codec;
 
-import com.yang.netty.enums.Constains;
+import com.alibaba.fastjson.JSON;
+import com.yang.netty.enums.Constants;
+
+import java.util.Arrays;
 
 /**
  * Scoket消息协议，
@@ -10,7 +13,7 @@ import com.yang.netty.enums.Constains;
 public class SocketMessage {
 
     // 4 byte 开头是ABED
-    private byte[] start = Constains.SOCKET_MESSAGE_HEADER_START;
+    private byte[] start = Constants.SOCKET_MESSAGE_HEADER_START;
     // 8 byte 已时间戳作为唯一标识
     private long id = System.currentTimeMillis();
     // 2 Byte 主消息类型
@@ -30,6 +33,12 @@ public class SocketMessage {
         this.mainType = mainType;
         this.subType = subType;
         this.body = body;
+    }
+
+    public SocketMessage(short mainType, short subType, Object body) {
+        this.mainType = mainType;
+        this.subType = subType;
+        this.body = JSON.toJSONString(body);
     }
 
     public byte[] getStart() {
@@ -80,4 +89,15 @@ public class SocketMessage {
         this.body = body;
     }
 
+    @Override
+    public String toString() {
+        return "SocketMessage{" +
+                "start=" + Arrays.toString(start) +
+                ", id=" + id +
+                ", mainType=" + mainType +
+                ", subType=" + subType +
+                ", length=" + length +
+                ", body='" + body + '\'' +
+                '}';
+    }
 }
