@@ -3,7 +3,7 @@
 
 协议中数据采用utf-8编码，结构为 header + body，header固定占用20个字节。body长度不定
 
-| --------------------------- header ------------------------ | - body - |  
+| ------------------------ header --------------------- | - body - |  
 | &nbsp; start &nbsp;| &nbsp; id &nbsp; | &nbsp; mainType&nbsp; | &nbsp; subType &nbsp; | &nbsp; length &nbsp; | &nbsp; body &nbsp; |
 
 - start: 占用4byte，消息头部标识位
