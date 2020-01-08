@@ -11,4 +11,4 @@
 - mainType：占用2byte，主消息类型
 - subType：占用2byte，子消息类型
 - length：占用4byte，消息数据体（body）的长度
-- body：占用len(body)byte，数据为""或者是json结构
+- body：占用len(body)byte，数据为""或者是json结构 

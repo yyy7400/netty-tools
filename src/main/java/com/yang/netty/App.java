@@ -14,7 +14,6 @@ public class App {
 
         SpringApplication.run(App.class, args);
         new NettyServer().start();
-
     }
 
 }
